@@ -14,36 +14,67 @@ export class AppComponent implements OnInit {
   private context: any;
   private socket: any;
 
-  public ngOnInit(){
+  public ngOnInit() {
     this.socket = io("http://localhost:3000");
     console.log("connected")
   }
 
-  public ngAfterViewInit(){
+  public ngAfterViewInit() {
     this.context = this.gameCanvas.nativeElement.getContext("2d");
     this.socket.on("position", position => {
-      this.context.clearRect(
-        0,  
-        0,
-        this.gameCanvas.nativeElement.width,
-        this.gameCanvas.nativeElement.height
-      )
       this.context.fillRect(position.x, position.y, 20, 20);
-    })
 
-    this.socket.on("position", position => {
-      // this.context.clearRect(
-      //   0,  
-      //   0,
-      //   this.gameCanvas.nativeElement.width,
-      //   this.gameCanvas.nativeElement.height
-      // )
-      this.context.fillRect(position.x + 50, position.y + 50, 20, 20);
+      switch (position.direction) {
+        case "left":
+          this.context.clearRect(
+            position.pos.x + 5,
+            position.pos.y,
+            20,
+            20
+          );
+          this.context.fillRect(position.pos.x, position.pos.y, 20, 20);
+          console.log("y" + position.pos.x)
+          console.log("x" + position.pos.y)
+          break;
+        case "right":
+          this.context.clearRect(
+            position.pos.x - 5,
+            position.pos.y,
+            20,
+            20
+          );
+          console.log("y" + position.pos.x)
+          console.log("x" + position.pos.y)
+          this.context.fillRect(position.pos.x, position.pos.y, 20, 20);
+          break;
+        case "up":
+          this.context.clearRect(
+            position.pos.x,
+            position.pos.y + 5,
+            20,
+            20
+          );
+          console.log("y" + position.pos.x)
+          console.log("x" + position.pos.y)
+          this.context.fillRect(position.pos.x, position.pos.y, 20, 20);
+          break;
+        case "down":
+          this.context.clearRect(
+            position.pos.x,
+            position.pos.y - 5,
+            20,
+            20
+          );
+          console.log("y" + position.pos.x)
+          console.log("x" + position.pos.y)
+          this.context.fillRect(position.pos.x, position.pos.y, 20, 20);
+          break;
+      }
+
     })
-    
   }
 
-  public move(direction: string){
+  public move(direction: string) {
     this.socket.emit("move", direction);
   }
 
