@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import io from "socket.io-client";
 
 @Component({
@@ -6,84 +6,79 @@ import io from "socket.io-client";
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, AfterViewInit {
 
   @ViewChild("game")
   private gameCanvas: ElementRef;
 
+
   private context: any;
   private socket: any;
+  private board: any;
+
+  public readonly colors: Array<string> = ['green', 'red']
 
   public ngOnInit() {
     this.socket = io("http://localhost:3000");
-    
+
   }
 
   public ngAfterViewInit() {
-    console.log("SSSSSSS")
 
     this.context = this.gameCanvas.nativeElement.getContext("2d");
     this.socket.emit("new player")
-    // this.socket.on("position", position => {
-    //   console.log(position.pos.position.x)
-    //   this.context.fillRect(position.position, position.y, 20, 20);
-    //   switch (position.direction) {
-    //     case "left":
-    //       this.context.clearRect(
-    //         position.pos.position.x + 5,
-    //         position.pos.position.y,
-    //         20,
-    //         20
-    //       );
-    //       this.context.fillRect(position.pos.position.x, position.pos.position.y, 20, 20);
-    //       console.log("y" + position.pos.position.x)
-    //       console.log("x" + position.pos.position.y)
-    //       break;
-    //     case "right":
-    //       this.context.clearRect(
-    //         position.pos.x - 5,
-    //         position.pos.y,
-    //         20,
-    //         20
-    //       );
-    //       console.log("y" + position.pos.x)
-    //       console.log("x" + position.pos.y)
-    //       this.context.fillRect(position.pos.x, position.pos.y, 20, 20);
-    //       break;
-    //     case "up":
-    //       this.context.clearRect(
-    //         position.pos.x,
-    //         position.pos.y + 5,
-    //         20,
-    //         20
-    //       );
-    //       console.log("y" + position.pos.x)
-    //       console.log("x" + position.pos.y)
-    //       this.context.fillRect(position.pos.x, position.pos.y, 20, 20);
-    //       break;
-    //     case "down":
-    //       this.context.clearRect(
-    //         position.pos.x,
-    //         position.pos.y - 5,
-    //         20,
-    //         20
-    //       );
-    //       console.log("y" + position.pos.x)
-    //       console.log("x" + position.pos.y)
-    //       this.context.fillRect(position.pos.x, position.pos.y, 20, 20);
-    //       break;
-    //   }
 
-    // })
+    this.socket.on('maze', maze => {
+      this.board = maze
+      this.draw()
+    })
 
     this.socket.on('state', players => {
-        this.context.clearRect(0, 0 , 800, 600)
-        this.context.fillStyle = 'green'
-        for(var id in players){
-          var player = players[id];
-          this.context.fillRect(player.x, player.y, 20, 20);
-        }
+      // this.context.clearRect(0, 0, 800, 600)
+      this.context.fillStyle = this.colors[1]
+      for (var id in players) {
+        var player = players[id];
+        this.context.fillRect(player.x, player.y, 20, 20);
+      }
     })
+
+    
+  }
+
+  public draw() {
+    var width = 640
+    console.log(this.board)
+    var blockSize = width / this.board.length;
+    this.context.setTransform(1, 0, 0, 1, 0, 0);
+    this.context.clearRect(0, 0, width, width);
+    this.context.fillStyle = "green";
+    //Loop through the board array drawing the walls and the goal
+    for (var y = 0; y < this.board.length; y++) {
+      for (var x = 0; x < this.board[y].length; x++) {
+        //Draw a wall
+        if (this.board[y][x] === 1) {
+          console.log(this.board[y][x])
+          this.context.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+        }
+        //Draw the goal
+        // else if (this.board[y][x] === -1) {
+        //   this.context.beginPath();
+        //   this.context.lineWidth = 5;
+        //   this.context.strokeStyle = "gold";
+        //   this.context.moveTo(x * blockSize, y * blockSize);
+        //   this.context.lineTo((x + 1) * blockSize, (y + 1) * blockSize);
+        //   this.context.moveTo(x * blockSize, (y + 1) * blockSize);
+        //   this.context.lineTo((x + 1) * blockSize, y * blockSize);
+        //   this.context.stroke();
+        // }
+      }
+    }
+    //Draw the player
+    // this.context.beginPath();
+    // var half = blockSize / 2;
+    // this.context.fillStyle = "blue";
+    // this.context.arc(this.playerX * blockSize + half, this.playerY * blockSize + half, half, 0, 2 * Math.PI);
+    // this.context.fill();
   }
 
   public move(direction: string) {
