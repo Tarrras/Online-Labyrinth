@@ -68,12 +68,12 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.context.fillStyle = this.colors[1]
       for (var id in players) {
         var player = players[id];
-        // this.context.fillRect(player.x, player.y, 20, 20);
-        this.context.beginPath();
-        this.context.rect(player.x, player.y, 20, 20);
-        this.context.fillStyle = 'red';
-        this.context.fill();
-        this.context.closePath();
+        this.context.fillRect(player.x, player.y, 20, 20);
+        // this.context.beginPath();
+        // this.context.rect(player.x, player.y, 20, 20);
+        // this.context.fillStyle = 'red';
+        // this.context.fill();
+        // this.context.closePath();
       }
     })
 
