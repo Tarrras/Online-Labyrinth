@@ -37,11 +37,10 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
   }
 
-
-  private canvas: any;
   private context: any;
   private socket: any;
   private board: any;
+  public myData: any;
 
   public readonly colors: Array<string> = ['green', 'red']
 
@@ -63,21 +62,13 @@ export class AppComponent implements OnInit, AfterViewInit {
     })
 
     this.socket.on('state', players => {
-      // this.context.clearRect(0, 0, 800, 600)
-      // this.draw()
-      this.context.fillStyle = this.colors[1]
+      // this.context.fillStyle = 
       for (var id in players) {
         var player = players[id];
+        this.context.fillStyle = player.color
         this.context.fillRect(player.x, player.y, 20, 20);
-        // this.context.beginPath();
-        // this.context.rect(player.x, player.y, 20, 20);
-        // this.context.fillStyle = 'red';
-        // this.context.fill();
-        // this.context.closePath();
       }
     })
-
-
   }
 
   public draw() {
@@ -93,25 +84,8 @@ export class AppComponent implements OnInit, AfterViewInit {
         if (this.board[y][x] === 1) {
           this.context.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
         }
-        // Draw the goal
-        // else if (this.board[y][x] === -1) {
-        //   this.context.beginPath();
-        //   this.context.lineWidth = 5;
-        //   this.context.strokeStyle = "gold";
-        //   this.context.moveTo(x * blockSize, y * blockSize);
-        //   this.context.lineTo((x + 1) * blockSize, (y + 1) * blockSize);
-        //   this.context.moveTo(x * blockSize, (y + 1) * blockSize);
-        //   this.context.lineTo((x + 1) * blockSize, y * blockSize);
-        //   this.context.stroke();
-        // }
       }
     }
-    //Draw the player
-    // this.context.beginPath();
-    // var half = blockSize / 2;
-    // this.context.fillStyle = "blue";
-    // this.context.arc(this.playerX * blockSize + half, this.playerY * blockSize + half, half, 0, 2 * Math.PI);
-    // this.context.fill();
   }
 
   public move(direction: string) {
