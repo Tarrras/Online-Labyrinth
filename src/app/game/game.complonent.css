@@ -1,0 +1,19 @@
+/* .canvas {
+    display: inline-block;
+} */
+
+.timer {
+    margin-left: 50px;
+}
+
+.main {
+    display: flex;
+}
+
+.way {
+    margin-left: 50px;
+}
+
+.main_div {
+    display: inline-block;
+}
