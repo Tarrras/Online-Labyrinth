@@ -3,7 +3,8 @@ import io from "socket.io-client";
 // import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogConfig } from '@angular/material/dialog';
 // import { ModalComponent } from '/modal/modal.component';
 import { NgModel } from '@angular/forms';
-
+import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
 
 enum KEY_CODE {
   RIGHT_ARROW = 39,
@@ -26,8 +27,10 @@ export class GameComponent implements OnInit, AfterViewInit {
   timeLeft: number = 1;
   duration = new Date(this.timeLeft * 1000).toISOString().substr(11, 8)
   remainingWay = 0
-  exitPostionX = 9
-  exitPostionY = 1
+  exitPostionX = 0
+  exitPostionY = 0
+  exitPostionAbsX = 0
+  exitPostionAbsY = 0
 
   @HostListener('document:keydown', ['$event'])
   keyEvent(event: KeyboardEvent) {
@@ -49,6 +52,11 @@ export class GameComponent implements OnInit, AfterViewInit {
     }
   }
 
+  @HostListener('window:popstate', ['$event'])
+  onPopState(event) {
+    this.socket.emit("disconnectUser")
+  }
+
   private context: any;
   private canvas: any;
   private socket: any;
@@ -56,14 +64,24 @@ export class GameComponent implements OnInit, AfterViewInit {
   public myData: any;
   public dialog: any;
   public showUsers = true;
+  public roomId;
   interval;
   public width = 640
 
   public readonly colors: Array<string> = ['green', 'red']
 
+  constructor(private route: ActivatedRoute, private location: Location) { }
+
   public ngOnInit() {
     this.socket = io("http://localhost:3000");
+    this.roomId = this.route.snapshot.paramMap.get('id');
   }
+
+  goBack() {
+    this.socket.emit("disconnectUser")
+    this.location.back();
+  }
+
 
   startTimer() {
     this.interval = setInterval(() => {
@@ -74,20 +92,45 @@ export class GameComponent implements OnInit, AfterViewInit {
     }, 1200)
   }
 
+  countExit() {
+    for (var y = 0; y < this.board.length; y++) {
+      for (var x = 0; x < this.board[y].length; x++) {
+        if (this.board[y][x] === 2) {
+          if (y == 0 || y == this.board.length) {
+            this.exitPostionAbsX = x
+            this.exitPostionAbsY = y
+            console.log('y')
+            this.exitPostionX = (this.width / this.board.length) * this.exitPostionAbsX + 25
+            this.exitPostionY = ((this.width / this.board.length) * this.exitPostionAbsY) + ((this.width / this.board.length) / 2) - 30
+          } else {
+            this.exitPostionAbsX = x + 1
+            this.exitPostionAbsY = y
+            this.exitPostionX = (this.width / this.board.length) * this.exitPostionAbsX - 25
+            this.exitPostionY = ((this.width / this.board.length) * this.exitPostionAbsY) + ((this.width / this.board.length) / 2) - 10
+          }
+
+          break;
+        }
+      }
+    }
+  }
+
   public ngAfterViewInit() {
+
     this.canvas = this.gameCanvas
     this.context = this.gameCanvas.nativeElement.getContext("2d");
-    this.socket.emit("new player")
+    console.log(this.roomId)
+    this.socket.emit("new player", this.roomId)
 
     this.socket.on('maze', maze => {
       this.board = maze
-      // this.countExit()
-      this.exitPostionX = (this.width / this.board.length) * 10 - 25
-      this.exitPostionY = ((this.width / this.board.length) * 1) + ((this.width / this.board.length) / 2) - 10
+      if (this.exitPostionX == 0 &&
+        this.exitPostionY == 0) { this.countExit() }
+
       this.draw()
-      if (this.timeLeft == 1) { 
+      if (this.timeLeft == 1) {
         console.log("tick")
-        this.startTimer() 
+        this.startTimer()
       }
     })
 

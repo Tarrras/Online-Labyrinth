@@ -59,7 +59,8 @@ import { RegisterComponent } from "./registration/register.component";
 import { GameComponent } from "./game/game.component";
 
 
-import { appRoutingModule } from './app.routing';
+import { AppRoutingModule } from './app.routing';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
   declarations: [
@@ -67,15 +68,10 @@ import { appRoutingModule } from './app.routing';
     ModalComponent,
     RegisterComponent,
     GameComponent,
-    // MatButtonModule,
-    // MatFormFieldModule,
-    // MatInputModule,
-    // MatRippleModule,
-    
   ],
   imports: [
+    AppRoutingModule,
     BrowserModule,
-    appRoutingModule,
     BrowserAnimationsModule,
     MatButtonModule,
     MatFormFieldModule,
